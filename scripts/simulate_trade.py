@@ -239,8 +239,10 @@ if __name__ == '__main__':
         print(f'{conf} -- Maximum Draw Down : {round(max_drawdown(balance_in_time) * 100, 2)}')
 
         label = conf.replace("_nv", "").replace("_v", "")
+        label = label.replace("aiden_", "")
         label = LABEL_DICT.get(label)
-        tmp = [timstamps[0] - 24 * 60 * 60] + timstamps
+        # tmp = [timstamps[0] - 24 * 60 * 60] + timstamps # 하루 전
+        tmp = [timstamps[0] - 15 * 60] + timstamps # 15분 전
         tmp = [datetime.fromtimestamp(int(x)) for x in tmp]
         sns.lineplot(x=tmp, 
                      y=balance_in_time, 

@@ -1,0 +1,83 @@
+{
+    // IntelliSense를 사용하여 가능한 특성에 대해 알아보세요.
+    // 기존 특성에 대한 설명을 보려면 가리킵니다.
+    // 자세한 내용을 보려면 https://go.microsoft.com/fwlink/?linkid=830387을(를) 방문하세요.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python 디버거: 인수가 있는 현재 파일",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": "${command:pickArgs}"
+        },
+        {
+            "name": "Python: iTransformer 디버그",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/training.py",
+            "console": "integratedTerminal",
+            // "cwd": "${workspaceFolder}",
+            "args": [
+                "--config",
+                "aiden_cmamba_v",
+                "--logger_type",
+                "wandb",
+                "--expname",
+                "cmamba_cmamba_v",
+                "--save_checkpoints"
+            ],
+        },
+        {
+            "name": "Python: evaluaion 디버그",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/evaluation.py",
+            "console": "integratedTerminal",
+            // "cwd": "${workspaceFolder}",
+            "args": [
+                "--config",
+                "aiden_cmamba_v",
+                // "aiden_itransformer_v",
+                "--logger_type",
+                "wandb",
+                "--expname",
+                "cmamba_cmamba_v",
+                // "cmamba_itransformer_v",
+                "--ckpt_path",
+                "cmamba_cmamba_v/uao5garq/checkpoints/epoch759-val-rmse176.4887.ckpt",
+                // "cmamba_itransformer_v/m341g7xi/checkpoints/epoch984-val-rmse300.6877.ckpt"
+            ],
+        },
+        {
+            "name": "Python: simulate_trade 디버그",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/simulate_trade.py",
+            "console": "integratedTerminal",
+            // "cwd": "${workspaceFolder}",
+            "args": [
+                "--config",
+                // "aiden_cmamba_v",
+                "aiden_itransformer_v",
+                "--logger_type",
+                "wandb",
+                "--expname",
+                // "cmamba_cmamba_v",
+                "cmamba_itransformer_v",
+                "--ckpt_path",
+                // "cmamba_cmamba_v/uao5garq/checkpoints/epoch759-val-rmse176.4887.ckpt",
+                "cmamba_itransformer_v/m341g7xi/checkpoints/epoch984-val-rmse300.6877.ckpt",
+                "--balance",
+                "100000",
+                "--split",
+                "val",
+                "--trade_mode",
+                "vanilla",
+                "--risk",
+                "0.002"
+            ],
+        },
+    ]
+}
