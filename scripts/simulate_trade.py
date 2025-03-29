@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 from argparse import ArgumentParser
 from pl_modules.data_module import CMambaDataModule
 from data_utils.data_transforms import DataTransform
+import warnings
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 sns.set_theme(style='whitegrid', context='paper', font_scale=2)
 palette = sns.color_palette('muted')
@@ -198,7 +201,7 @@ if __name__ == '__main__':
         model, normalize = load_model(config, args.ckpt_path, config_name=conf) 
 
         use_volume = config.get('use_volume', False)
-        test_transform = DataTransform(is_train=False, use_volume=use_volume)
+        test_transform = DataTransform(is_train=False, use_volume=use_volume, additional_features=config.get('additional_features', []))
         data_module = CMambaDataModule(data_config,
                                         train_transform=test_transform,
                                         val_transform=test_transform,
@@ -233,7 +236,6 @@ if __name__ == '__main__':
         balance, balance_in_time = trade(data, time_key, timstamps, targets, preds, 
                                          balance=args.balance, mode=args.trade_mode, 
                                          risk=args.risk, y_key=model.y_key)
-        # raise ValueError(max_drawdown(balance_in_time))
 
         print(f'{conf} -- Final balance: {round(balance, 2)}')
         print(f'{conf} -- Maximum Draw Down : {round(max_drawdown(balance_in_time) * 100, 2)}')

@@ -20,6 +20,7 @@ CryptoMamba’s robust performance and generalizability make it a promising solu
   * [Requirements](#-requirements)
   * [Usage](#-usage)
     * [Data](#data)
+    * [Config](#config)
     * [Train New Model](#train-new-model)
     * [Evaluate Model](#evaluate-model)
     * [Predict Next Day Price](#predict-next-day-price)
@@ -46,6 +47,15 @@ If you have difficulties installing `mamba_ssm`, please follow the instructions 
 <p align="justify" > 
 You can find the processed data that we use in <a href="./data/2018-17-09_2024-16-09_1440">here</a>. If you want to use another data configuration, you should change the configuration in <a href="./configs/data_configs/mode_1.yaml">the data config file</a>. Note that the <code>data_path</code> should point to the raw data file with similar format to <a href="./data/one_day_trade.csv">this</a>.
 </p>
+
+
+### Config
+<p align="justify" > 
+If you want to use additional features other than Open, Close, High, Low, Timestamp, and Volume, you should specify a list called `additional_features` in your data and training configuration files. Note that your raw data file should have these features. 
+</br>
+If you want to change the time resolution, you should change the `date_format` in your data configuration file and also set `jumps` to your desired resolution in seconds. Note that your raw data dates and your start and end dates in the data configuration should follow the new date format.
+</p>
+
 
 ### Train New Model
 To train a model, use the following: 

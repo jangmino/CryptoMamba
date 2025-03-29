@@ -4,6 +4,7 @@ model: 'CMamba_v1'
 name: 'CMamba'
 max_epochs: 1100
 use_volume: False
+additional_features: []
 
 hyperparams:
     optimizer: 'adam'

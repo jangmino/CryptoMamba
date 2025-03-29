@@ -1,7 +1,0 @@
-target: pl_modules.cmamba_module.CryptoMambaClassificationModule
-params: 
-    num_features: 6
-    hidden_dims: [14, 16, 32, 16, 8, 1]
-    d_states: 128
-    layer_density: 3
-normalize: True

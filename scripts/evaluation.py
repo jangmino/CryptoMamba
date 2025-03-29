@@ -15,6 +15,9 @@ from data_utils.data_transforms import DataTransform
 
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import warnings
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import seaborn as sns
 sns.set_theme(style='whitegrid', context='paper', font_scale=3)
@@ -178,9 +181,9 @@ if __name__ == "__main__":
     use_volume = args.use_volume
     if not use_volume:
         use_volume = config.get('use_volume')
-    train_transform = DataTransform(is_train=True, use_volume=use_volume)
-    val_transform = DataTransform(is_train=False, use_volume=use_volume)
-    test_transform = DataTransform(is_train=False, use_volume=use_volume)
+    train_transform = DataTransform(is_train=True, use_volume=use_volume, additional_features=config.get('additional_features', []))
+    val_transform = DataTransform(is_train=False, use_volume=use_volume, additional_features=config.get('additional_features', []))
+    test_transform = DataTransform(is_train=False, use_volume=use_volume, additional_features=config.get('additional_features', []))
 
     model, normalize = load_model(config, args.ckpt_path)
     data_module = CMambaDataModule(data_config,

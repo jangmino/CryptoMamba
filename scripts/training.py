@@ -9,6 +9,9 @@ from pl_modules.data_module import CMambaDataModule
 from data_utils.data_transforms import DataTransform
 from pytorch_lightning.strategies.ddp import DDPStrategy
 from pytorch_lightning.loggers import TensorBoardLogger
+import warnings
+
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 ROOT = io_tools.get_root(__file__, num_returns=2)
@@ -134,11 +137,12 @@ if __name__ == "__main__":
 
     data_config = io_tools.load_config_from_yaml(f"{ROOT}/configs/data_configs/{config.get('data_config')}.yaml")
     use_volume = args.use_volume
+
     if not use_volume:
         use_volume = config.get('use_volume')
-    train_transform = DataTransform(is_train=True, use_volume=use_volume)
-    val_transform = DataTransform(is_train=False, use_volume=use_volume)
-    test_transform = DataTransform(is_train=False, use_volume=use_volume)
+    train_transform = DataTransform(is_train=True, use_volume=use_volume, additional_features=config.get('additional_features', []))
+    val_transform = DataTransform(is_train=False, use_volume=use_volume, additional_features=config.get('additional_features', []))
+    test_transform = DataTransform(is_train=False, use_volume=use_volume, additional_features=config.get('additional_features', []))
 
     model, normalize = load_model(config, args.logger_type)
 
@@ -178,15 +182,17 @@ if __name__ == "__main__":
         )
         callbacks.append(checkpoint_callback)
 
-
     max_epochs = config.get('max_epochs', args.max_epochs)
+    model.set_normalization_coeffs(data_module.factors)
+
     trainer = pl.Trainer(accelerator=args.accelerator, 
                          devices=args.devices,
                          max_epochs=max_epochs,
                          enable_checkpointing=args.save_checkpoints,
+                         log_every_n_steps=10,
                          logger=logger,
                          callbacks=callbacks,
-                         strategy = DDPStrategy(find_unused_parameters=True),
+                         strategy = DDPStrategy(find_unused_parameters=False),
                          )
 
     trainer.fit(model, datamodule=data_module)

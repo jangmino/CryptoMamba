@@ -39,12 +39,25 @@ class BaseModule(pl.LightningModule):
         self.mse = nn.MSELoss()
         self.l1 = nn.L1Loss()
         self.mape = MAPE()
+        self.normalization_coeffs = None
 
     def forward(self, x, y_old=None):
         if self.mode == 'default':
             return self.model(x).reshape(-1)
         elif self.mode == 'diff':
             return self.model(x).reshape(-1) + y_old
+        
+    def set_normalization_coeffs(self, factors):
+        scale = factors.get(self.y_key).get('max') - factors.get(self.y_key).get('min')
+        shift = factors.get(self.y_key).get('min')
+        self.normalization_coeffs = (scale, shift)
+
+    def denormalize(self, y, y_hat):
+        if self.normalization_coeffs is not None:
+            scale, shift = self.normalization_coeffs
+            y = y * scale + shift
+            y_hat = y_hat * scale + shift
+        return y, y_hat
 
     def training_step(self, batch, batch_idx):
         x = batch['features']
@@ -53,6 +66,7 @@ class BaseModule(pl.LightningModule):
         if self.batch_size is None:
             self.batch_size = x.shape[0]
         y_hat = self.forward(x, y_old).reshape(-1)
+        y, y_hat = self.denormalize(y, y_hat)
         mse = self.mse(y_hat, y)
         rmse = torch.sqrt(mse)
         mape = self.mape(y_hat, y)
@@ -80,6 +94,7 @@ class BaseModule(pl.LightningModule):
         if self.batch_size is None:
             self.batch_size = x.shape[0]
         y_hat = self.forward(x, y_old).reshape(-1)
+        y, y_hat = self.denormalize(y, y_hat)
         mse = self.mse(y_hat, y)
         rmse = torch.sqrt(mse)
         mape = self.mape(y_hat, y)
@@ -100,6 +115,7 @@ class BaseModule(pl.LightningModule):
         if self.batch_size is None:
             self.batch_size = x.shape[0]
         y_hat = self.forward(x, y_old).reshape(-1)
+        y, y_hat = self.denormalize(y, y_hat)
         mse = self.mse(y_hat, y)
         rmse = torch.sqrt(mse)
         mape = self.mape(y_hat, y)

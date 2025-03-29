@@ -12,7 +12,9 @@ from argparse import ArgumentParser
 from pl_modules.data_module import CMambaDataModule
 from data_utils.data_transforms import DataTransform
 from utils.trade import buy_sell_vanilla, buy_sell_smart
+import warnings
 
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 
 ROOT = io_tools.get_root(__file__, num_returns=2)
@@ -147,9 +149,9 @@ if __name__ == "__main__":
         data['Timestamp'] = [float(time.mktime(datetime.strptime(x, "%Y-%m-%d").timetuple())) for x in data['Date']]
     data = data.sort_values(by='Timestamp').reset_index()
 
-    train_transform = DataTransform(is_train=True, use_volume=use_volume)
-    val_transform = DataTransform(is_train=False, use_volume=use_volume)
-    test_transform = DataTransform(is_train=False, use_volume=use_volume)
+    train_transform = DataTransform(is_train=True, use_volume=use_volume, additional_features=config.get('additional_features', []))
+    val_transform = DataTransform(is_train=False, use_volume=use_volume, additional_features=config.get('additional_features', []))
+    test_transform = DataTransform(is_train=False, use_volume=use_volume, additional_features=config.get('additional_features', []))
     data_module = CMambaDataModule(data_config,
                                    train_transform=train_transform,
                                    val_transform=val_transform,
@@ -200,7 +202,6 @@ if __name__ == "__main__":
     x = torch.cat([features.get(x) for x in features.keys()], dim=0)
 
     close_idx = -2 if use_volume else -1
-    # y = float(tmp[close_idx, tmp[0, :] * t_scale + t_shift == end_ts][0])
     today = float(x[close_idx, -1])
 
     with torch.no_grad():
