@@ -3,7 +3,7 @@ torchvision
 torchaudio
 setuptools
 pyaml
-pytorch-lightning
+lightning
 matplotlib
 seaborn
 pandas

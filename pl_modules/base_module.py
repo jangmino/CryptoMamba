@@ -50,8 +50,8 @@ class BaseModule(pl.LightningModule):
     def set_normalization_coeffs(self, factors):
         if factors is None:
             return
-        scale = factors.get(self.y_key).get("max") - factors.get(self.y_key).get("min")
-        shift = factors.get(self.y_key).get("min")
+        scale = factors.get(self.y_key).get('max') - factors.get(self.y_key).get('min')
+        shift = factors.get(self.y_key).get('min')
         self.normalization_coeffs = (scale, shift)
 
     def denormalize(self, y, y_hat):

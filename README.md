@@ -1,6 +1,17 @@
-# 🚀 CryptoMamba: Leveraging State Space Models for Accurate Bitcoin Price Prediction
+<p align="center">
+ <img src="assets/logo.png" alt="drawing" width="200" style="float: center;"/> 
+</p>
 
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/license/MIT)
+<h1 align="center">🚀 CryptoMamba: Leveraging State Space Models for Accurate Bitcoin Price Prediction</h1>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License"/></a>
+  <a href="https://github.com/MShahabSepehri/CryptoMamba/stargazers"><img src="https://img.shields.io/github/stars/MShahabSepehri/CryptoMamba?style=social" alt="GitHub Stars"/></a>
+</p>
+
+> 📣 **Announcements**  
+> CryptoMamba paper has been published at [IEEE International Conference on Blockchain and Cryptocurrency (ICBC) 2025](https://icbc2025.ieee-icbc.org/)! 🎉  
+> We presented CryptoMamba at the [Advances in Financial AI Workshop @ ICLR 2025](https://sites.google.com/view/financialaiiclr25/).
 
 <p align="justify" > 
 <strong>CryptoMamba</strong> is a novel Mamba-based architecture designed for accurate and efficient time-series forecasting, with a focus on cryptocurrency price prediction. Leveraging the capabilities of SSMs, CryptoMamba excels at capturing long-range dependencies and adapting to highly volatile market conditions.
@@ -30,14 +41,14 @@ CryptoMamba’s robust performance and generalizability make it a promising solu
 
 ## 🔧 Requirements
 
-To install the requirements you can use:
+To install the requirements, you can use:
 
 ```
 pip install -r requirements.txt
 ```
 
 <p align="justify" > 
-If you have difficulties installing `mamba_ssm`, please follow the instructions in <a href="https://github.com/state-spaces/mamba">its GitHub repository</a>.
+If you have difficulties installing <code>mamba_ssm</code>, please follow the instructions in <a href="https://github.com/state-spaces/mamba">its GitHub repository</a>.
 </p>
 
 ## 💡 Usage
@@ -45,15 +56,15 @@ If you have difficulties installing `mamba_ssm`, please follow the instructions 
 ### Data
 
 <p align="justify" > 
-You can find the processed data that we use in <a href="./data/2018-17-09_2024-16-09_1440">here</a>. If you want to use another data configuration, you should change the configuration in <a href="./configs/data_configs/mode_1.yaml">the data config file</a>. Note that the <code>data_path</code> should point to the raw data file with similar format to <a href="./data/one_day_trade.csv">this</a>.
+You can find the processed data that we use in <a href="./data/2018-09-17_2024-09-16_86400">here</a>. If you want to use another data configuration, you should change the configuration in <a href="./configs/data_configs/mode_1.yaml">the data config file</a>. Note that the <code>data_path</code> should point to the raw data file with a similar format to <a href="./data/one_day_pred.csv">this</a>.
 </p>
 
 
 ### Config
 <p align="justify" > 
-If you want to use additional features other than Open, Close, High, Low, Timestamp, and Volume, you should specify a list called `additional_features` in your data and training configuration files. Note that your raw data file should have these features. 
+If you want to use additional features other than Open, Close, High, Low, Timestamp, and Volume, you should specify a list called <code>additional_features</code> in your data and training configuration files. Note that your raw data file should have these features. 
 </br>
-If you want to change the time resolution, you should change the `date_format` in your data configuration file and also set `jumps` to your desired resolution in seconds. Note that your raw data dates and your start and end dates in the data configuration should follow the new date format.
+If you want to change the time resolution, you should change the <code>date_format</code> in your data configuration file and also set <code>jumps</code> to your desired resolution in seconds. Note that your raw data dates and your start and end dates in the data configuration should follow the new date format.
 </p>
 
 
@@ -64,7 +75,7 @@ To train a model, use the following:
 python3 scripts/training.py --config CONFIG_NAME
 ```
 <p align="justify" > 
-Here, `CONFIG_NAME` is the name of a config file in <a href="configs/training/">the training config folder</a> without its extension. For example, to train CryptoMamba with volume you can run the following command:
+Here, <code>CONFIG_NAME</code> is the name of a config file in <a href="configs/training/">the training config folder</a> without its extension. For example, to train CryptoMamba with volume you can run the following command:
 </p>
 
 ```
@@ -73,7 +84,7 @@ python3 scripts/training.py --config cmamba_v
 
 ### Evaluate Model
 
-To evaluate a model, run the this command:
+To evaluate a model, run this command:
 ```
 python scripts/evaluation.py --config CONFIG_NAME --ckpt_path PATH_TO_CHECKPOINT
 ```
@@ -88,7 +99,7 @@ Where `SPLIT_NAME` is `train`, `val`, or `test` and `TRADE_ALGORITHM is` `smart`
 
 ### Predict Next Day Price
 <p align="justify" > 
-We also have a script to predict the next day price and trade suggestions by providing the prices of its previous days. You have to create a `csv` file similar to [this](data/one_day_trade.csv) and use this command:
+We also have a script to predict the next day's price and trade suggestions by providing the prices of its previous days. You have to create a <code>csv</code> file similar to [this](data/one_day_trade.csv) and use this command:
 </p>
 
 ```
@@ -109,12 +120,13 @@ If you don't provide a value for `DATE`, the code automatically predicts one day
 | LSTM | 2672.7 | 3.609 | 2094.3 | 204K |
 | Bi-LSTM | 2325.6 | 3.072 | 1778.8 | 569k |
 | GRU | 1892.4 | 2.385 | 1371.2 | 153k |
+| iTransformer | 1826.9 | 2.4260 | 1334.3 | 201k |
 | S-Mamba | 1717.4 | 2.248 | 1239.9 | 330k |
 | CryptoMamba | **1713.0** | **2.171** | **1200.9** | **136k** |
 | LSTM-v | 2202.1 | 2.896 | 1668.9 | 204K |
 | Bi-LSTM-v | 2080.2 | 2.738 | 1562.5 | 569k |
 | GRU-v | 1978.0 | 2.526 | 1454.3  | 153k |
-| iTransformer-v | 1779.9 | 2.427 | 1322.1 | 301k |
+| iTransformer-v | 1779.9 | 2.427 | 1322.1 | 201k |
 | S-Mamba-v | 1651.6 | 2.215 | 1209.7 | 330k |
 | CryptoMamba-v | **1598.1** | **2.034** | **1120.7** | **136k** |
 
