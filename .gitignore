@@ -158,5 +158,9 @@ wandb/
 cmamba_cmamba_v/
 cmamba_itransformer_v/
 Results/
-data/aiden_*/
-data/2022-01-01_2024-31-12_15/
+data/
+cmamba_itransformer_v_additional/
+cmamba_itransformer_v_seq_len60/
+cmamba_lstm_bi_v/
+cmamba_lstm_v/
+scratch_notebooks/

@@ -1,4 +1,5 @@
 import os, sys, pathlib
+
 sys.path.insert(0, os.path.dirname(pathlib.Path(__file__).parent.absolute()))
 
 import yaml
@@ -11,10 +12,11 @@ from pytorch_lightning.strategies.ddp import DDPStrategy
 from pytorch_lightning.loggers import TensorBoardLogger
 import warnings
 
-warnings.simplefilter(action='ignore', category=FutureWarning)
+warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
 ROOT = io_tools.get_root(__file__, num_returns=2)
+
 
 def get_args():
     parser = ArgumentParser()
@@ -26,7 +28,7 @@ def get_args():
     parser.add_argument(
         "--accelerator",
         type=str,
-        default='gpu',
+        default="gpu",
         help="The type of accelerator.",
     )
     parser.add_argument(
@@ -44,18 +46,18 @@ def get_args():
     parser.add_argument(
         "--expname",
         type=str,
-        default='Cmamba',
+        default="Cmamba",
         help="Experiment name. Reconstructions will be saved under this folder.",
     )
     parser.add_argument(
         "--config",
         type=str,
-        default='cmamba_nv',
+        default="cmamba_nv",
         help="Path to config file.",
     )
     parser.add_argument(
         "--logger_type",
-        default='tb',
+        default="tb",
         type=str,
         help="Path to config file.",
     )
@@ -72,23 +74,23 @@ def get_args():
         help="batch_size",
     )
     parser.add_argument(
-        '--save_checkpoints', 
-        default=False,   
-        action='store_true',          
+        "--save_checkpoints",
+        default=False,
+        action="store_true",
     )
     parser.add_argument(
-        '--use_volume', 
-        default=False,   
-        action='store_true',          
+        "--use_volume",
+        default=False,
+        action="store_true",
     )
 
     parser.add_argument(
-        '--resume_from_checkpoint',
+        "--resume_from_checkpoint",
         default=None,
     )
 
     parser.add_argument(
-        '--max_epochs',
+        "--max_epochs",
         type=int,
         default=200,
     )
@@ -101,26 +103,26 @@ def save_all_hparams(log_dir, args):
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     save_dict = vars(args)
-    path = log_dir + '/hparams.yaml'
+    path = log_dir + "/hparams.yaml"
     if os.path.exists(path):
         return
-    with open(path, 'w') as f:
+    with open(path, "w") as f:
         yaml.dump(save_dict, f)
 
 
 def load_model(config, logger_type):
-    arch_config = io_tools.load_config_from_yaml('configs/models/archs.yaml')
-    model_arch = config.get('model')
-    model_config_path = f'{ROOT}/configs/models/{arch_config.get(model_arch)}'
+    arch_config = io_tools.load_config_from_yaml("configs/models/archs.yaml")
+    model_arch = config.get("model")
+    model_config_path = f"{ROOT}/configs/models/{arch_config.get(model_arch)}"
     model_config = io_tools.load_config_from_yaml(model_config_path)
 
-    normalize = model_config.get('normalize', False)
-    hyperparams = config.get('hyperparams')
+    normalize = model_config.get("normalize", False)
+    hyperparams = config.get("hyperparams")
     if hyperparams is not None:
         for key in hyperparams.keys():
-            model_config.get('params')[key] = hyperparams.get(key)
+            model_config.get("params")[key] = hyperparams.get(key)
 
-    model_config.get('params')['logger_type'] = logger_type
+    model_config.get("params")["logger_type"] = logger_type
     model = io_tools.instantiate_from_config(model_config)
     model.cuda()
     model.train()
@@ -133,42 +135,59 @@ if __name__ == "__main__":
     pl.seed_everything(args.seed)
     logdir = args.logdir
 
-    config = io_tools.load_config_from_yaml(f'{ROOT}/configs/training/{args.config}.yaml')
+    config = io_tools.load_config_from_yaml(
+        f"{ROOT}/configs/training/{args.config}.yaml"
+    )
 
-    data_config = io_tools.load_config_from_yaml(f"{ROOT}/configs/data_configs/{config.get('data_config')}.yaml")
+    data_config = io_tools.load_config_from_yaml(
+        f"{ROOT}/configs/data_configs/{config.get('data_config')}.yaml"
+    )
     use_volume = args.use_volume
 
     if not use_volume:
-        use_volume = config.get('use_volume')
-    train_transform = DataTransform(is_train=True, use_volume=use_volume, additional_features=config.get('additional_features', []))
-    val_transform = DataTransform(is_train=False, use_volume=use_volume, additional_features=config.get('additional_features', []))
-    test_transform = DataTransform(is_train=False, use_volume=use_volume, additional_features=config.get('additional_features', []))
+        use_volume = config.get("use_volume")
+    train_transform = DataTransform(
+        is_train=True,
+        use_volume=use_volume,
+        additional_features=data_config.get("additional_features", []),
+    )
+    val_transform = DataTransform(
+        is_train=False,
+        use_volume=use_volume,
+        additional_features=data_config.get("additional_features", []),
+    )
+    test_transform = DataTransform(
+        is_train=False,
+        use_volume=use_volume,
+        additional_features=data_config.get("additional_features", []),
+    )
 
     model, normalize = load_model(config, args.logger_type)
 
     tmp = vars(args)
     tmp.update(config)
 
-    name = config.get('name', args.expname)
-    if args.logger_type == 'tb':
+    name = config.get("name", args.expname)
+    if args.logger_type == "tb":
         logger = TensorBoardLogger("logs", name=name)
         logger.log_hyperparams(args)
-    elif args.logger_type == 'wandb':
+    elif args.logger_type == "wandb":
         logger = pl.loggers.WandbLogger(project=args.expname, config=tmp)
     else:
-        raise ValueError('Unknown logger type.')
+        raise ValueError("Unknown logger type.")
 
-    data_module = CMambaDataModule(data_config,
-                                   train_transform=train_transform,
-                                   val_transform=val_transform,
-                                   test_transform=test_transform,
-                                   batch_size=args.batch_size,
-                                   distributed_sampler=True,
-                                   num_workers=args.num_workers,
-                                   normalize=normalize,
-                                   window_size=model.window_size,
-                                   )
-    
+    data_module = CMambaDataModule(
+        data_config,
+        train_transform=train_transform,
+        val_transform=val_transform,
+        test_transform=test_transform,
+        batch_size=args.batch_size,
+        distributed_sampler=True,
+        num_workers=args.num_workers,
+        normalize=normalize,
+        window_size=model.window_size,
+    )
+
     callbacks = []
     if args.save_checkpoints:
         checkpoint_callback = pl.callbacks.ModelCheckpoint(
@@ -176,25 +195,28 @@ if __name__ == "__main__":
             verbose=True,
             monitor="val/rmse",
             mode="min",
-            filename='epoch{epoch}-val-rmse{val/rmse:.4f}',
+            filename="epoch{epoch}-val-rmse{val/rmse:.4f}",
             auto_insert_metric_name=False,
-            save_last=True
+            save_last=True,
         )
         callbacks.append(checkpoint_callback)
 
-    max_epochs = config.get('max_epochs', args.max_epochs)
+    max_epochs = config.get("max_epochs", args.max_epochs)
     model.set_normalization_coeffs(data_module.factors)
 
-    trainer = pl.Trainer(accelerator=args.accelerator, 
-                         devices=args.devices,
-                         max_epochs=max_epochs,
-                         enable_checkpointing=args.save_checkpoints,
-                         log_every_n_steps=10,
-                         logger=logger,
-                         callbacks=callbacks,
-                         strategy = DDPStrategy(find_unused_parameters=False),
-                         )
+    trainer = pl.Trainer(
+        accelerator=args.accelerator,
+        devices=args.devices,
+        max_epochs=max_epochs,
+        enable_checkpointing=args.save_checkpoints,
+        log_every_n_steps=10,
+        logger=logger,
+        callbacks=callbacks,
+        strategy=DDPStrategy(find_unused_parameters=False),
+    )
 
     trainer.fit(model, datamodule=data_module)
     if args.save_checkpoints:
-        trainer.test(model, datamodule=data_module, ckpt_path=checkpoint_callback.best_model_path)
+        trainer.test(
+            model, datamodule=data_module, ckpt_path=checkpoint_callback.best_model_path
+        )
