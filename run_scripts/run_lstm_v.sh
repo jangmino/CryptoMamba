@@ -19,7 +19,7 @@ ARGS=(
     "cmamba_lstm_v"
     "--save_checkpoints"
     "--batch_size=256"
-    "--num_workers=8"
+    "--num_workers=4"
 )
 
 # --- Execution ---
