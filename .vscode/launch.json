@@ -21,18 +21,14 @@
             // "cwd": "${workspaceFolder}",
             "args": [
                 "--config",
-                // "aiden_cmamba_v",
-                // "aiden_itransformer_v_additional",
-                "aiden_lstm_v",
+                "aiden_itransformer_v",
                 "--logger_type",
-                "wandb",
+                "none",
                 "--expname",
-                // "cmamba_cmamba_v_additional",
-                // "cmamba_itransformer_v_additional",
-                "cmamba_lstm_v_debug",
+                "cmamba_itransformer_v",
                 "--save_checkpoints",
-                "--num_workers=12",
-                "--batch_size=256"
+                "--batch_size=256",
+                "--num_workers=8",
             ],
         },
         {

@@ -57,15 +57,23 @@ class CMambaDataModule(pl.LightningDataModule):
         self.factors = None
 
         self.converter = DataConverter(data_config)
-        train, val, test = self.converter.get_data()
+        train_df, val_df, test_df = self.converter.get_data()
+
+        # [수정] DataFrame을 NumPy 배열 딕셔너리로 변환
         self.data_dict = {
-            "train": train,
-            "val": val,
-            "test": test,
+            "train": self._df_to_numpy_dict(train_df),
+            "val": self._df_to_numpy_dict(val_df),
+            "test": self._df_to_numpy_dict(test_df),
         }
 
         if normalize:
             self.normalize()
+
+    # [추가] DataFrame을 NumPy 딕셔너리로 변환하는 헬퍼 함수
+    def _df_to_numpy_dict(self, df):
+        if df is None:
+            return None
+        return {col: df[col].to_numpy() for col in df.columns}
 
     def normalize(self):
         train_data = self.data_dict.get("train")
@@ -75,93 +83,54 @@ class CMambaDataModule(pl.LightningDataModule):
             return
 
         factors = {}
-        # --- 수정: Training set 만으로 min/max 계산 ---
         print("Calculating normalization factors using TRAINING data only...")
-        for key in train_data.keys():
-            if key in train_data and len(train_data[key]) > 0:
-                try:
-                    # numpy 배열로 변환하여 효율적으로 계산하고, 숫자형 데이터인지 확인
-                    feature_data = np.asarray(train_data[key])
-                    if np.issubdtype(feature_data.dtype, np.number):
-                        min_val = np.min(feature_data)
-                        max_val = np.max(feature_data)
-                        scale = max_val - min_val
-                        shift = min_val
-
-                        # min == max 인 경우 (상수 값 피처) 처리: scale=1, shift=min_val -> 정규화 결과는 0
-                        if abs(scale) < 1e-9:  # 부동소수점 오차 감안
-                            print(
-                                f"Warning: Feature '{key}' has a constant value ({min_val}) in the training set. Normalizing to 0."
-                            )
-                            factors[key] = {
-                                "min": min_val,
-                                "max": max_val,
-                                "scale": 1.0,
-                                "shift": min_val,
-                            }
-                        else:
-                            factors[key] = {
-                                "min": min_val,
-                                "max": max_val,
-                                "scale": scale,
-                                "shift": shift,
-                            }
-                    else:
-                        print(
-                            f"Warning: Feature '{key}' is not numeric. Skipping normalization for this feature."
-                        )
-                        factors[key] = None  # 이 피처는 정규화 건너뜀
-                except Exception as e:
+        for key, feature_data in train_data.items():
+            if np.issubdtype(feature_data.dtype, np.number):
+                min_val = np.min(feature_data)
+                max_val = np.max(feature_data)
+                scale = max_val - min_val
+                shift = min_val
+                if abs(scale) < 1e-9:
                     print(
-                        f"Warning: Could not process feature '{key}'. Error: {e}. Skipping normalization."
+                        f"Warning: Feature '{key}' has a constant value. Normalizing to 0."
                     )
-                    factors[key] = None  # 에러 발생 시 건너뜀
+                    factors[key] = {
+                        "min": min_val,
+                        "max": max_val,
+                        "scale": 1.0,
+                        "shift": min_val,
+                    }
+                else:
+                    factors[key] = {
+                        "min": min_val,
+                        "max": max_val,
+                        "scale": scale,
+                        "shift": shift,
+                    }
             else:
-                print(
-                    f"Warning: Feature '{key}' not found or empty in training data. Skipping normalization."
-                )
-                factors[key] = None  # 데이터 없으면 건너뜀
+                factors[key] = None
 
-        self.factors = factors  # 계산된 factors 저장 (train 기준)
+        self.factors = factors
 
-        # --- 수정: 모든 데이터 분할에 Training set 기준 factors 적용 ---
         print("Applying normalization to all data splits...")
         for split, data in self.data_dict.items():
             if data is None:
                 continue
             print(f"Normalizing split: {split}")
-            for key in data.keys():
-                # 해당 key에 대한 factors가 정상적으로 계산되었는지 확인
+
+            # 원본 타임스탬프 백업
+            if "Timestamp" in data:
+                data["Timestamp_orig"] = data["Timestamp"].copy()
+
+            for key, feature_data in data.items():
                 if key in self.factors and self.factors[key] is not None:
                     factor_info = self.factors[key]
                     scale = factor_info.get("scale")
                     shift = factor_info.get("shift")
-
-                    # 원본 타임스탬프 백업 (정규화 성공 여부와 관계없이)
-                    if key == "Timestamp":
-                        data["Timestamp_orig"] = copy(data.get(key))
-
-                    # scale 값이 유효한 경우에만 정규화 적용
                     if scale is not None and shift is not None and abs(scale) > 1e-9:
-                        try:
-                            feature_data = np.asarray(data[key])
-                            if np.issubdtype(feature_data.dtype, np.number):
-                                data[key] = (feature_data - shift) / scale
-                            # else: 숫자형 아니면 그대로 둠
-                        except Exception as e:
-                            print(
-                                f"Warning: Could not normalize feature '{key}' in split '{split}'. Error: {e}"
-                            )
-                    elif abs(scale) < 1e-9:  # scale이 0에 가까운 경우 (상수값 처리)
-                        try:
-                            feature_data = np.asarray(data[key])
-                            if np.issubdtype(feature_data.dtype, np.number):
-                                # factors 딕셔너리 생성 시 scale=1, shift=min_val로 설정했으므로 아래 계산은 0이 됨
-                                data[key] = (feature_data - shift) / scale
-                        except Exception as e:
-                            print(
-                                f"Warning: Could not normalize constant feature '{key}' in split '{split}'. Error: {e}"
-                            )
+                        data[key] = (feature_data - shift) / scale
+                    elif abs(scale) < 1e-9:  # 상수 값 처리
+                        data[key] = (feature_data - shift) / scale
 
     def _create_data_loader(self, data_split, data_transform, batch_size=None):
         dataset = CMambaDataset(

@@ -13,4 +13,4 @@ params:
     n_heads: 16
     loss: 'mse'
     window_size: 28
-normalize: False
+normalize: True

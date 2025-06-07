@@ -173,6 +173,8 @@ if __name__ == "__main__":
         logger.log_hyperparams(args)
     elif args.logger_type == "wandb":
         logger = pl.loggers.WandbLogger(project=args.expname, config=tmp)
+    elif args.logger_type == "none":
+        logger = False
     else:
         raise ValueError("Unknown logger type.")
 

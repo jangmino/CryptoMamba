@@ -11,31 +11,39 @@ from utils.io_tools import load_config_from_yaml
 
 
 class CMambaDataset(torch.utils.data.Dataset):
-
-    def __init__(
-        self,
-        data,
-        split,
-        window_size,
-        transform,
-    ):
-
+    def __init__(self, data, split, window_size, transform):
+        # [수정] 이제 self.data는 DataFrame이 아닌 NumPy 배열의 딕셔너리입니다.
         self.data = data
         self.transform = transform
         self.window_size = window_size
 
+        # [수정] 데이터 길이는 첫 번째 피처의 길이로 계산합니다.
+        # 데이터가 없는 경우를 대비한 방어 코드 추가
+        if self.data and len(self.data.keys()) > 0:
+            first_key = next(iter(self.data))
+            self.num_samples = len(self.data[first_key])
+        else:
+            self.num_samples = 0
+
         print("{} data points loaded as {} split.".format(len(self), split))
 
     def __len__(self):
-        return max(0, len(self.data) - self.window_size - 1)
+        # [수정] 데이터 길이를 저장된 값으로 사용
+        return max(0, self.num_samples - self.window_size)
 
     def __getitem__(self, i: int):
         """
+        [수정] 이제 iloc 대신 빠른 NumPy 슬라이싱을 사용합니다.
         sample['features']: [num_features, window_size]
         sample['Close']: 타겟 (window_size+1 번째 값)
         """
-        sample = self.data.iloc[i : i + self.window_size + 1]
-        sample = self.transform(sample)
+        # [수정] 모든 키에 대해 NumPy 배열을 슬라이싱하여 윈도우를 만듭니다.
+        start_idx = i
+        end_idx = i + self.window_size + 1
+
+        window_dict = {key: arr[start_idx:end_idx] for key, arr in self.data.items()}
+
+        sample = self.transform(window_dict)
         return sample
 
 

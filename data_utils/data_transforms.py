@@ -12,35 +12,34 @@ class DataTransform:
 
     def __call__(self, window):
         """
-        클래스 인스턴스를 함수처럼 호출할 때 실행되는 메서드입니다.
-        주어진 데이터 창(window)을 모델 입력 형식으로 변환합니다.
-
-        Args:
-            window (pd.DataFrame or similar): 시계열 데이터의 한 부분을 나타내는 데이터 창입니다.
-
-        Returns:
-            dict: 모델 학습/추론에 필요한 데이터를 담은 딕셔너리.
-                  'features': 모델 입력 특성 텐서 (특성 수, 창 길이 - 1)
-                  '<key>': 각 키에 해당하는 마지막 시점의 값
-                  '<key>_old': 각 키에 해당하는 마지막에서 두 번째 시점의 값
-                  'Timestamp_orig': (존재할 경우) 정규화 전 원본 타임스탬프의 마지막 값
+        [수정] 이제 window는 DataFrame이 아닌 NumPy 배열의 딕셔너리입니다.
         """
         data_list = []
         output = {}
-        if "Timestamp_orig" in window.keys():
-            self.keys.append("Timestamp_orig")
+
+        # [수정] window가 딕셔너리이므로 keys()를 바로 사용
+        keys_in_window = list(window.keys())
+        # Timestamp_orig가 있으면 키 리스트에 추가 (data_module에서 처리)
+        # if "Timestamp_orig" not in self.keys and "Timestamp_orig" in keys_in_window:
+        #     self.keys.append("Timestamp_orig")
+
         for key in self.keys:
-            data = torch.tensor(window.get(key).tolist())
+            if key not in keys_in_window:
+                continue
+
+            # [수정] .get(key).tolist() 대신 바로 텐서로 변환
+            data = torch.tensor(window.get(key), dtype=torch.float32)
+
             if key == "Volume":
                 data /= 1e9
             output[key] = data[-1]
             output[f"{key}_old"] = data[-2]
-            if key == "Timestamp_orig":
+            if "Timestamp_orig" in key:  # Timestamp_orig는 피처에 포함하지 않음
                 continue
             data_list.append(data[:-1].reshape(1, -1))
+
         features = torch.cat(data_list, 0)
         output["features"] = features
-        # raise ValueError(output)
         return output
 
     def set_initial_seed(self, seed):

@@ -12,4 +12,4 @@ params:
     factor: 1
     n_heads: 16
     loss: 'mse'
-normalize: False
+normalize: True
