@@ -1,7 +1,7 @@
 target: pl_modules.itransformer_module.iTransformerModule
 params:
     num_features: 6
-    seq_len: 60
+    seq_len: 14
     use_norm: True
     d_model: 128
     d_ff: 128
@@ -12,5 +12,5 @@ params:
     factor: 1
     n_heads: 16
     loss: 'mse'
-    window_size: 60
+    window_size: 14
 normalize: False
