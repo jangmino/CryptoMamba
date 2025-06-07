@@ -163,4 +163,7 @@ cmamba_itransformer_v_additional/
 cmamba_itransformer_v_seq_len60/
 cmamba_lstm_bi_v/
 cmamba_lstm_v/
+cmamba_lstm_v_debug/
 scratch_notebooks/
+
+id_container

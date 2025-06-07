@@ -30,7 +30,9 @@
                 // "cmamba_cmamba_v_additional",
                 // "cmamba_itransformer_v_additional",
                 "cmamba_lstm_v_debug",
-                "--save_checkpoints"
+                "--save_checkpoints",
+                "--num_workers=12",
+                "--batch_size=256"
             ],
         },
         {
