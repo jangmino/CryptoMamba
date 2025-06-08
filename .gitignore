@@ -163,6 +163,8 @@ cmamba_lstm_bi_v/
 cmamba_lstm_bi_nv/
 cmamba_lstm_v/
 cmamba_lstm_nv/
+cmamba_gru_v/
+cmamba_gru_nv/
 cmamba_cmamba_v/
 cmamba_cmamba_nv/
 cmamba_itransformer_v/
