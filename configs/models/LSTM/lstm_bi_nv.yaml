@@ -5,4 +5,5 @@ params:
     num_layers: 3
     bidirectional: True
     window_size: 14
+    loss: 'mse'
 normalize: True

@@ -12,4 +12,5 @@ params:
     factor: 1
     n_heads: 16
     loss: 'mse'
+    window_size: 14
 normalize: True
