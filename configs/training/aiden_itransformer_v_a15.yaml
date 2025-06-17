@@ -1,8 +1,8 @@
-data_config: 'aiden_15m_additional'
-model: 'iTransformer_v_additional'
+data_config: 'aiden_15m_a15'
+model: 'iTransformer_v_a15'
 
-name: 'aiden_itransformer_additional'
-max_epochs: 3000
+name: 'aiden_itransformer_a15'
+max_epochs: 1500
 use_volume: True
 
 hyperparams:

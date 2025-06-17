@@ -157,7 +157,6 @@ cython_debug/
 wandb/
 Results/
 data/
-cmamba_itransformer_v_additional/
 cmamba_itransformer_v_seq_len60/
 cmamba_lstm_bi_v/
 cmamba_lstm_bi_nv/
@@ -167,8 +166,10 @@ cmamba_gru_v/
 cmamba_gru_nv/
 cmamba_cmamba_v/
 cmamba_cmamba_nv/
+cmamba_cmamba_*/
 cmamba_itransformer_v/
 cmamba_itransformer_nv/
+cmamba_itransformer_*/
 
 scratch_notebooks/
 
