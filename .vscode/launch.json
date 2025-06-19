@@ -13,6 +13,24 @@
             "args": "${command:pickArgs}"
         },
         {
+            "name": "Python: xgboost train 디버그",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/scripts/training.py",
+            "console": "integratedTerminal",
+            // "cwd": "${workspaceFolder}",
+            "args": [
+                "--use_xgboost",
+                "--config",
+                "aiden_xgboost_diff_v_a15",
+                "--logger_type",
+                "none",
+                "--expname",
+                "cmamba_xgboost_diff_v_a15",
+                "--save_checkpoints",
+            ],
+        },
+        {
             "name": "Python: cmamba_v train 디버그",
             "type": "debugpy",
             "request": "launch",

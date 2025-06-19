@@ -1,0 +1,6 @@
+data_config: 'aiden_15m'
+model: 'XGBoost_mode_diff'
+
+name: 'aiden_xgboost_mode_diff'
+max_epochs: 1000
+use_volume: True

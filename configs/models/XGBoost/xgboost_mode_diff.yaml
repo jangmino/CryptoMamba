@@ -1,0 +1,21 @@
+params:
+  y_key: Close
+  window_size: 14
+  xgb_params:
+    objective: reg:squarederror
+    eval_metric: mae
+    max_depth: 4                    # 감소
+    learning_rate: 0.3              # 증가
+    n_estimators: 1000
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 3             # 증가
+    gamma: 0.1                      # 추가
+    reg_alpha: 0.1                  # L1 정규화
+    reg_lambda: 10                  # L2 정규화 강화
+    tree_method: hist
+    device: cuda
+    early_stopping_rounds: 100     # 증가
+    verbosity: 1
+normalize: True
+mode: diff

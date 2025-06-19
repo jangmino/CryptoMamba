@@ -170,6 +170,7 @@ cmamba_cmamba_*/
 cmamba_itransformer_v/
 cmamba_itransformer_nv/
 cmamba_itransformer_*/
+cmamba_xgboost_*/
 
 scratch_notebooks/
 

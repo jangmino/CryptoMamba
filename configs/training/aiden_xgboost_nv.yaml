@@ -1,0 +1,6 @@
+data_config: 'aiden_15m'
+model: 'XGBoost_v1'
+
+name: 'aiden_xgboost'
+max_epochs: 1000
+use_volume: False

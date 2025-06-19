@@ -1,0 +1,20 @@
+params:
+  y_key: Close
+  window_size: 14
+  xgb_params:
+    objective: reg:squarederror
+    eval_metric: mae
+    max_depth: 6
+    learning_rate: 0.05
+    n_estimators: 1000
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 1
+    gamma: 0
+    reg_alpha: 0
+    reg_lambda: 1
+    tree_method: hist
+    device: cuda
+    early_stopping_rounds: 50
+    verbosity: 1
+normalize: True
